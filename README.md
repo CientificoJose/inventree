@@ -55,7 +55,7 @@ INVENTREE_CACHE_PORT=6379
 INVENTREE_GUNICORN_TIMEOUT=90
 INVENTREE_PLUGINS_ENABLED=True
 INVENTREE_AUTO_UPDATE=True
-INVENTREE_TAG=stable
+INVENTREE_TAG=0.16.0
 INVENTREE_WEB_PORT=8000
 INVENTREE_SITE_URL=http://tu-dominio.com
 INVENTREE_SECRET_KEY=TU_CLAVE_SECRETA_AQUI
@@ -120,6 +120,14 @@ INVENTREE_ADMIN_EMAIL=tu@email.com
 ### No puedo acceder
 - Verifica que el puerto 8000 esté expuesto
 - Si usas dominio, asegúrate que el DNS apunte a tu servidor
+
+### Error INVE-E1: "No frontend included"
+Este error ocurre cuando usas el tag `stable` en lugar de una versión específica.
+
+**Solución:**
+- Cambia `INVENTREE_TAG=stable` por `INVENTREE_TAG=0.16.0` (o la versión más reciente)
+- El tag `stable` NO incluye el frontend compilado
+- Solo las versiones con números específicos (0.16.0, 1.0.0, etc.) incluyen el frontend
 
 ## 📚 Recursos
 
