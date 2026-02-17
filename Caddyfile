@@ -1,0 +1,37 @@
+# Caddyfile for InvenTree
+
+# The default server address is configured in the .env file
+# If not specified, the proxy listens for all http/https traffic
+:80 {
+	# Log to stdout/stderr so docker can capture it
+	log
+
+	encode gzip
+
+	request_body {
+		max_size 100MB
+	}
+
+	# Handle static request files
+	handle_path /static/* {
+		root * /var/www/static
+		file_server
+	}
+
+	# Handle media request files
+	handle_path /media/* {
+		root * /var/www/media
+		file_server
+
+		# Force download of media files (for security)
+		header Content-Disposition attachment
+
+		# Authentication is handled by the forward_auth directive
+		forward_auth inventree-server:8000 {
+			uri /auth/
+		}
+	}
+
+	# All other requests are proxied to the InvenTree server
+	reverse_proxy inventree-server:8000
+}

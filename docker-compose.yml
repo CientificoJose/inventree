@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+    # Database service
+    # Use PostgreSQL as the database backend
+    inventree-db:
+        image: postgres:17
+        container_name: inventree-db
+        expose:
+            - 5432/tcp
+        environment:
+            - PGDATA=/var/lib/postgresql/data/pgdb
+            - POSTGRES_USER=${INVENTREE_DB_USER}
+            - POSTGRES_PASSWORD=${INVENTREE_DB_PASSWORD}
+            - POSTGRES_DB=${INVENTREE_DB_NAME}
+        volumes:
+            # Map 'data' volume such that postgres database is stored externally
+            - inventree_data:/var/lib/postgresql/data/
+        restart: unless-stopped
+
+    # redis acts as database cache manager
+    inventree-cache:
+        image: redis:7.0
+        container_name: inventree-cache
+        expose:
+            - 6379
+        restart: always
+
+    # InvenTree web server service
+    # Uses gunicorn as the web server
+    inventree-server:
+        # If you wish to specify a particular InvenTree version, do so here
+        image: inventree/inventree:${INVENTREE_TAG:-stable}
+        container_name: inventree-server
+        # Only change this port if you understand the stack.
+        expose:
+            - 8000
+        depends_on:
+            - inventree-db
+            - inventree-cache
+        env_file:
+            - .env
+        volumes:
+            # Data volume must map to /home/inventree/data
+            - inventree_data:/home/inventree/data
+        restart: unless-stopped
+
+    # Background worker process handles long-running or periodic tasks
+    inventree-worker:
+        # If you wish to specify a particular InvenTree version, do so here
+        image: inventree/inventree:${INVENTREE_TAG:-stable}
+        container_name: inventree-worker
+        command: invoke worker
+        depends_on:
+            - inventree-server
+            - inventree-db
+            - inventree-cache
+        env_file:
+            - .env
+        volumes:
+            # Data volume must map to /home/inventree/data
+            - inventree_data:/home/inventree/data
+        restart: unless-stopped
+
+    # caddy acts as reverse proxy and static file server
+    # https://hub.docker.com/_/caddy
+    inventree-proxy:
+        container_name: inventree-proxy
+        image: caddy:alpine
+        restart: always
+        depends_on:
+            - inventree-server
+        ports:
+            - ${INVENTREE_WEB_PORT:-80}:80
+            # - 443:443 # Dokploy usually handles SSL termination at the edge (Traefik), so we might not need to expose 443 here directly if using Dokploy's proxy. 
+            # However, for a standalone compose stack inside Dokploy, usually exposing a port is enough.
+        env_file:
+            - .env
+        volumes:
+            - ./Caddyfile:/etc/caddy/Caddyfile:ro
+            - inventree_data:/var/www:z
+            - inventree_data:/var/log:z
+            - inventree_data:/data:z
+            - inventree_data:/config:z
+
+volumes:
+    inventree_data:
+        driver: local
