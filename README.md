@@ -65,6 +65,7 @@ INVENTREE_SECRET_KEY=TU_CLAVE_SECRETA_AQUI
 - Cambia `TU_CONTRASEÑA_SEGURA_AQUI` por una contraseña fuerte
 - Cambia `TU_CLAVE_SECRETA_AQUI` por una clave aleatoria de 32+ caracteres
 - Actualiza `INVENTREE_SITE_URL` con tu dominio real
+- Configura las variables de email si quieres notificaciones por correo
 
 ### 5️⃣ Configurar Dominio (Opcional)
 
@@ -80,7 +81,28 @@ Si quieres acceder con un dominio personalizado:
 2. Espera 2-5 minutos mientras se descargan las imágenes
 3. Verifica el estado en los logs
 
-## 🔐 Crear Usuario Administrador
+## � Configuración de Email (Opcional)
+
+Si quieres que InvenTree envíe notificaciones por correo electrónico, agrega estas variables:
+
+```env
+INVENTREE_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+INVENTREE_EMAIL_HOST=mail.press-cloud.com
+INVENTREE_EMAIL_PORT=465
+INVENTREE_EMAIL_USERNAME=erp-inventree@press-cloud.com
+INVENTREE_EMAIL_PASSWORD=tu_contraseña_email
+INVENTREE_EMAIL_TLS=False
+INVENTREE_EMAIL_SSL=True
+INVENTREE_EMAIL_SENDER=erp-inventree@press-cloud.com
+INVENTREE_EMAIL_PREFIX=[InvenTree]
+```
+
+**Notas:**
+- Usa `INVENTREE_EMAIL_SSL=True` para puerto 465
+- Usa `INVENTREE_EMAIL_TLS=True` para puerto 587
+- `EMAIL_SENDER` es el remitente que aparecerá en los correos
+
+## �🔐 Crear Usuario Administrador
 
 Después del primer despliegue, necesitas crear un usuario admin:
 
